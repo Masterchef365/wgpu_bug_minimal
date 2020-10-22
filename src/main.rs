@@ -1,5 +1,5 @@
-use iced_wgpu::wgpu;
-use iced_winit::winit;
+use iced_wgpu::{wgpu, Renderer, Backend, Settings};
+use iced_winit::{winit, Debug};
 use winit::{
     event::{Event, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
@@ -8,7 +8,9 @@ use winit::{
 
 async fn run(event_loop: EventLoop<()>, window: Window, swapchain_format: wgpu::TextureFormat) {
     let size = window.inner_size();
-    let instance = wgpu::Instance::new(wgpu::BackendBit::PRIMARY);
+
+    let instance = wgpu::Instance::new(wgpu::BackendBit::DX12);
+
     let surface = unsafe { instance.create_surface(&window) };
     let adapter = instance
         .request_adapter(&wgpu::RequestAdapterOptions {
@@ -20,7 +22,7 @@ async fn run(event_loop: EventLoop<()>, window: Window, swapchain_format: wgpu::
         .expect("Failed to find an appropiate adapter");
 
     // Create the logical device and command queue
-    let (device, queue) = adapter
+    let (mut device, queue) = adapter
         .request_device(
             &wgpu::DeviceDescriptor {
                 features: wgpu::Features::empty(),
@@ -31,6 +33,9 @@ async fn run(event_loop: EventLoop<()>, window: Window, swapchain_format: wgpu::
         )
         .await
         .expect("Failed to create device");
+
+    let mut debug = Debug::new();
+    let mut renderer = Renderer::new(Backend::new(&mut device, Settings::default()));
 
     // Load the shaders from disk
     let vs_module = device.create_shader_module(wgpu::include_spirv!("shader.vert.spv"));
@@ -113,7 +118,7 @@ async fn run(event_loop: EventLoop<()>, window: Window, swapchain_format: wgpu::
                             attachment: &frame.view,
                             resolve_target: None,
                             ops: wgpu::Operations {
-                                load: wgpu::LoadOp::Clear(wgpu::Color::GREEN),
+                                load: wgpu::LoadOp::Clear(wgpu::Color::BLACK),
                                 store: true,
                             },
                         }],
