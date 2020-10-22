@@ -5,9 +5,7 @@ use wgpu::util::DeviceExt;
 
 pub struct PrimitiveRenderer {
     lines: Option<(wgpu::Buffer, usize)>,
-    points: Option<(wgpu::Buffer, usize)>,
     lines_pipeline: wgpu::RenderPipeline,
-    points_pipeline: wgpu::RenderPipeline,
     uniform_buf: wgpu::Buffer,
     bind_group: wgpu::BindGroup,
 }
@@ -109,14 +107,10 @@ impl PrimitiveRenderer {
         };
 
         let lines_pipeline = device.create_render_pipeline(&pipeline_desc);
-        pipeline_desc.primitive_topology = wgpu::PrimitiveTopology::PointList;
-        let points_pipeline = device.create_render_pipeline(&pipeline_desc);
 
         Self {
             lines: None,
-            points: None,
             lines_pipeline,
-            points_pipeline,
             uniform_buf,
             bind_group,
         }
@@ -159,12 +153,6 @@ impl PrimitiveRenderer {
         if let Some((lines, n_vertices)) = &self.lines {
             rpass.set_pipeline(&self.lines_pipeline);
             rpass.set_vertex_buffer(0, lines.slice(..));
-            rpass.draw(0..*n_vertices as u32, 0..1);
-        }
-
-        if let Some((points, n_vertices)) = &self.points {
-            rpass.set_pipeline(&self.points_pipeline);
-            rpass.set_vertex_buffer(0, points.slice(..));
             rpass.draw(0..*n_vertices as u32, 0..1);
         }
     }
