@@ -1,4 +1,3 @@
-use crate::screen_multiplexer::DrawArea;
 use crate::vertex::Vertex;
 use iced_winit::winit::dpi::PhysicalSize;
 use iced_wgpu::wgpu;
@@ -184,15 +183,5 @@ impl PrimitiveRenderer {
             usage: wgpu::BufferUsage::VERTEX,
         });
         self.lines = Some((buffer, lines.len()));
-    }
-
-    /// Set pointcloud vertices and colors
-    pub fn set_points(&mut self, device: &wgpu::Device, points: &[Vertex]) {
-        let buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label: Some("Point Buffer"),
-            contents: bytemuck::cast_slice(&points),
-            usage: wgpu::BufferUsage::VERTEX,
-        });
-        self.points = Some((buffer, points.len()));
     }
 }

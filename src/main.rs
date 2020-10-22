@@ -1,32 +1,19 @@
 mod vertex;
 mod camera;
-mod screen_multiplexer;
 mod shapes;
 mod primitive_renderer;
-use futures::FutureExt;
-use futures::StreamExt;
-use std::fs;
 use vertex::Vertex;
 
 use primitive_renderer::PrimitiveRenderer;
 
-use iced_wgpu::{wgpu, Backend, Renderer, Settings, Viewport};
-use iced_winit::{conversion, futures, program, winit, Debug, Size};
+use iced_wgpu::{wgpu, Backend, Renderer, Settings};
+use iced_winit::{futures, winit};
 
 use futures::task::SpawnExt;
 use winit::{
-    dpi::{PhysicalPosition, PhysicalSize},
     event::{Event, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
 };
-
-fn convert_size(size: PhysicalSize<u32>) -> Size<f32> {
-    Size::new(size.width as f32, size.height as f32)
-}
-
-fn convert_size_u32(size: PhysicalSize<u32>) -> Size<u32> {
-    Size::new(size.width, size.height)
-}
 
 const SWAPCHAIN_FORMAT: wgpu::TextureFormat = wgpu::TextureFormat::Bgra8UnormSrgb;
 
@@ -91,18 +78,14 @@ pub fn main() {
 
     // Initialize primitive rendering
     let mut primitive_renderer = PrimitiveRenderer::new(&mut device, SWAPCHAIN_FORMAT);
-    let mut camera = camera::Camera::default();
+    let camera = camera::Camera::default();
     let grid = shapes::grid(30, 1.);
     primitive_renderer.set_lines(&device, &grid);
 
     // Initialize iced
     if use_iced {
-        let mut debug = Debug::new();
-        let mut renderer = Renderer::new(Backend::new(&mut device, Settings::default()));
+        let _renderer = Renderer::new(Backend::new(&mut device, Settings::default()));
     }
-
-    // Set up command pool
-    let thread_pool = futures::executor::ThreadPool::new().unwrap();
 
     // Run event loop
     event_loop.run(move |event, _, control_flow| {
