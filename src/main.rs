@@ -35,8 +35,17 @@ pub fn main() {
     let event_loop = EventLoop::new();
     let window = winit::window::Window::new(&event_loop).unwrap();
 
+    let use_dx12 = std::env::args().skip(1).any(|s| s == "dx12");
+    let use_iced = std::env::args().skip(1).any(|s| s == "iced");
+
+    let backend = if use_dx12 {
+        wgpu::BackendBit::DX12
+    } else {
+        wgpu::BackendBit::DX11
+    };
+
     // Initialize wgpu
-    let instance = wgpu::Instance::new(wgpu::BackendBit::PRIMARY);
+    let instance = wgpu::Instance::new(backend);
     let surface = unsafe { instance.create_surface(&window) };
 
     let (mut device, queue) = futures::executor::block_on(async {
@@ -87,8 +96,10 @@ pub fn main() {
     primitive_renderer.set_lines(&device, &grid);
 
     // Initialize iced
-    let mut debug = Debug::new();
-    let mut renderer = Renderer::new(Backend::new(&mut device, Settings::default()));
+    if use_iced {
+        let mut debug = Debug::new();
+        let mut renderer = Renderer::new(Backend::new(&mut device, Settings::default()));
+    }
 
     let mut multiplexer = screen_multiplexer::ScreenMultiplexer::new(500, window.inner_size());
     let (left_area, _) = multiplexer.areas();
