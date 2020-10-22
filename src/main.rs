@@ -101,9 +101,6 @@ pub fn main() {
         let mut renderer = Renderer::new(Backend::new(&mut device, Settings::default()));
     }
 
-    let mut multiplexer = screen_multiplexer::ScreenMultiplexer::new(500, window.inner_size());
-    let (left_area, _) = multiplexer.areas();
-
     // Set up command pool
     let thread_pool = futures::executor::ThreadPool::new().unwrap();
 
@@ -120,16 +117,11 @@ pub fn main() {
                 if let WindowEvent::Resized(_) = &event {
                     swapchain_rebuild = true; // Rebuild swapchain
                 }
-
-                if let Some(event) = event.to_static() {
-                    let (left, right) = multiplexer.event(event);
-                    let (_, cursor_position) = multiplexer.cursors();
-                }
             }
             Event::MainEventsCleared => {
                 // Rebuild the swapchain if necessary
+                let size = window.inner_size();
                 if swapchain_rebuild {
-                    let size = window.inner_size();
                     swap_chain = device.create_swap_chain(
                         &surface,
                         &wgpu::SwapChainDescriptor {
@@ -143,8 +135,6 @@ pub fn main() {
                 }
 
                 // Get viewports from the partition
-                let (left_area, right_area) = multiplexer.areas();
-
                 swapchain_rebuild = false;
 
                 // Begin rendering another frame
@@ -154,10 +144,10 @@ pub fn main() {
                     device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
 
                 // Draw the primitive renderer
-                primitive_renderer.draw(&mut encoder, &frame.output.view, right_area);
+                primitive_renderer.draw(&mut encoder, &frame.output.view, size);
 
                 // Update camera matrices
-                let matrix = camera.matrix(right_area.size.width, right_area.size.height);
+                let matrix = camera.matrix(size.width, size.height);
                 primitive_renderer.set_camera_matrix(&queue, matrix.as_slice());
 
                 // Then we submit the work

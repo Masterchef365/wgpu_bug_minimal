@@ -1,5 +1,6 @@
 use crate::screen_multiplexer::DrawArea;
 use crate::vertex::Vertex;
+use iced_winit::winit::dpi::PhysicalSize;
 use iced_wgpu::wgpu;
 use wgpu::util::DeviceExt;
 
@@ -127,7 +128,7 @@ impl PrimitiveRenderer {
         &'a self,
         encoder: &'a mut wgpu::CommandEncoder,
         target: &'a wgpu::TextureView,
-        area: DrawArea,
+        area: PhysicalSize<u32>,
     ) {
         let mut rpass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
             color_attachments: &[wgpu::RenderPassColorAttachmentDescriptor {
@@ -141,18 +142,18 @@ impl PrimitiveRenderer {
             depth_stencil_attachment: None,
         });
         rpass.set_viewport(
-            area.position.x as f32,
-            area.position.y as f32,
-            area.size.width as f32,
-            area.size.height as f32,
+            0.,
+            0.,
+            area.width as f32,
+            area.height as f32,
             0.0,
             1.0,
         );
         rpass.set_scissor_rect(
-            area.position.x,
-            area.position.y,
-            area.size.width,
-            area.size.height,
+            0,
+            0,
+            area.width,
+            area.height,
         );
         rpass.set_bind_group(0, &self.bind_group, &[]);
 
