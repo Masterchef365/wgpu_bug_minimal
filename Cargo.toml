@@ -9,3 +9,5 @@ iced = { git = "https://github.com/hecrj/iced.git", rev = "23647d2f50f0e177b93cf
 iced_winit = { git = "https://github.com/hecrj/iced.git", rev = "23647d2f50f0e177b93cf09c72886a90702df982" }
 iced_wgpu = { git = "https://github.com/hecrj/iced.git", rev = "23647d2f50f0e177b93cf09c72886a90702df982" }
 futures = "0.3"
+bytemuck = "1.4"
+nalgebra = "0.22"
